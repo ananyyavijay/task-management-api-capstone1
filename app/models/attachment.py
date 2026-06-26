@@ -1,7 +1,7 @@
 from sqlalchemy import DateTime, String, UUID, ForeignKey, Text, CheckConstraint, Index
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime, timezone
-from database import Base
+from app.database import Base
 import uuid
 
 class Attachment(Base):
@@ -9,7 +9,7 @@ class Attachment(Base):
 
     __table_args__ = (
         Index("ix_attachments_task_id", "task_id"), 
-        Index("ix_attachments_uploaded_by, uploaded_by")
+        Index("ix_attachments_uploaded_by", "uploaded_by")
     )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

@@ -1,7 +1,7 @@
 from sqlalchemy import DateTime, String, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime, timezone
-from database import Base
+from app.database import Base
 import uuid
 
 class User(Base):
