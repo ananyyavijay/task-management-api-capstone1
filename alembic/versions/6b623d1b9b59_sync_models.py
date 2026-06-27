@@ -1,8 +1,8 @@
-"""Initial migration
+"""sync models
 
-Revision ID: cf33330d6f73
+Revision ID: 6b623d1b9b59
 Revises: 
-Create Date: 2026-06-26 10:41:41.016037
+Create Date: 2026-06-27 16:28:33.598381
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'cf33330d6f73'
+revision: str = '6b623d1b9b59'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -62,12 +62,14 @@ def upgrade() -> None:
     sa.Column('status', sa.String(length=20), nullable=False),
     sa.Column('priority', sa.String(length=20), nullable=False),
     sa.Column('assigned_to', sa.UUID(), nullable=False),
+    sa.Column('created_by', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('deleted_at', sa.DateTime(timezone=True), nullable=True),
     sa.CheckConstraint("priority IN ('Low', 'Normal', 'High', 'Critical')", name='ck_tasks_priority'),
     sa.CheckConstraint("status IN ('Todo', 'In Progress', 'In Review', 'Done')", name='ck_tasks_status'),
     sa.ForeignKeyConstraint(['assigned_to'], ['users.id'], ondelete='SET NULL'),
+    sa.ForeignKeyConstraint(['created_by'], ['users.id'], ),
     sa.ForeignKeyConstraint(['project_id'], ['projects.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
