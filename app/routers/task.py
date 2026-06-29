@@ -62,75 +62,47 @@ def create_task(
 
     return task
 
-@router.get("/tasks", response_model=List[TaskResponse], status_code=status.HTTP_200_OK)
+@router.get("/tasks", response_model=List[TaskResponse])
 def get_tasks(
-    project_id: UUID,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
-    
+    tasks = (
+        db.query(Task)
+        .join(Project, Task.project_id == Project.id)
+        .filter(Project.owner_id == current_user.id)
+        .all()
+    )
+
+    return tasks
+
+@router.get("/tasks/{id}", response_model=TaskResponse)
+def get_task(
+    id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    task = db.get(Task, id)
+
+    if task is None:
+        raise HTTPException(404, "Task not found")
+
     project = (
-        db.query(Project).filter(
-            Project.id == project_id,
-            Project.owner_id == current_user.id
-        ).first()
+        db.query(Project)
+        .filter(
+            Project.id == task.project_id,
+            Project.owner_id == current_user.id,
+        )
+        .first()
     )
 
     if project is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="project do not exists"
-        )
-    
-    tasks = (
-        db.query(Task).filter(
-            Task.project_id == project_id
-        ).all()
-    )
+        raise HTTPException(403, "Project not found")
 
-    if not tasks:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="task not found"
-        )
-    
-    return tasks
-
-@router.get("/tasks/{id}", response_model=List[TaskResponse], status_code=status.HTTP_200_OK)
-def get_tasks_by_id(
-    id: UUID, # project id
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    project = (
-        db.query(Project).filter(
-            Project.id == id,
-            Project.owner_id == current_user.id
-        ).first()
-    )
-
-    if project is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="project do not exists"
-        )
-    
-    tasks = (
-        db.query(Task).filter(
-            Task.project_id == id
-        ).all()
-    )
-
-    if not tasks:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="task not found"
-        )
-    
-    return tasks
+    return task
 
 @router.put("/tasks/{id}", response_model=TaskResponse, status_code=status.HTTP_200_OK)
-def update_projects(
+def update_task(
     id: UUID,
     data: TaskUpdateRequest,
     current_user: User = Depends(get_current_user),
@@ -149,7 +121,7 @@ def update_projects(
     )
 
     project = (
-        db.query(Task).filter(
+        db.query(Project).filter(
             Project.id == task.project_id,
             Project.owner_id == current_user.id
         ).first()
@@ -174,7 +146,7 @@ def update_projects(
         task.priority = data.priority
 
     db.commit()
-    db.refresh(project)
+    db.refresh(task)
 
     return task
 
@@ -234,7 +206,7 @@ def assign_task(
     return task
 
 @router.delete("/tasks/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_taks(
+def delete_task(
     id: UUID,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -252,7 +224,7 @@ def delete_taks(
     )
 
     project = (
-        db.query(Task).filter(
+        db.query(Project).filter(
             Project.id == task.project_id,
             Project.owner_id == current_user.id
         ).first()
@@ -268,5 +240,5 @@ def delete_taks(
     db.commit()
 
     return {
-        "message": "Project deleted successfully"
+        "message": "Task deleted successfully"
     }

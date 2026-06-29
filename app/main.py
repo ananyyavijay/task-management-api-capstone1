@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import auth, projects, task
+from app.routers import auth, projects, task, attachments
 
 app = FastAPI()
 
@@ -12,3 +12,5 @@ app.include_router(auth.router, prefix="/auth", tags=["Auth"])
 app.include_router(projects.router, tags=["Projects"])
 
 app.include_router(task.router, tags=["Tasks"])
+
+app.include_router(attachments.router, tags=["Attachments"])

@@ -6,7 +6,7 @@ from enum import Enum
 
 class TaskStatus(str, Enum):
     TODO = "Todo"
-    IN_PROGRESS = "In progress"
+    IN_PROGRESS = "In Progress"
     IN_REVIEW = "In Review"
     DONE = "Done"
 
@@ -30,19 +30,19 @@ class TaskResponse(BaseModel):
     id: UUID
     project_id: UUID
     title: str
-    description: Optional[str] = None
+    description: str | None = None
     status: TaskStatus
     priority: TaskPriority
-    assigned_to: UUID = None
+    assigned_to: UUID | None = None
     created_by: UUID
     created_at: datetime
     updated_at: datetime
 
 class TaskUpdateRequest(BaseModel):
-    title: Optional[str]
-    description: Optional[str]
+    title: str | None = None
+    description: str | None = None
     status: TaskStatus | None = None
     priority: TaskPriority | None = None
 
 class AssignTaskRequest(BaseModel):
-    assigned_to: UUID
+    assigned_to: UUID | None = None
