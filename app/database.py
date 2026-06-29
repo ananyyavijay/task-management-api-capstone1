@@ -2,6 +2,11 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
  
+from sqlalchemy import UUID
+from sqlalchemy.dialects.mssql import UNIQUEIDENTIFIER
+
+id_type = UUID().with_variant(UNIQUEIDENTIFIER, "mssql")
+
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
     "sqlite:///./capstone.db"   # local fallback

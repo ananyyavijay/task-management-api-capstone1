@@ -13,6 +13,6 @@ class AttachmentResponse(BaseModel):
     filename: str
     blob_url: str
     content_type: str
-    size_bytes: str
+    size_bytes: int
     uploaded_by: UUID
     uploaded_at: datetime
