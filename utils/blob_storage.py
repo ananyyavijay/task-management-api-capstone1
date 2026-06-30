@@ -11,11 +11,24 @@ CONTAINER_NAME = os.getenv("BLOB_CONTAINER_NAME")
 if not CONTAINER_NAME:
     raise RuntimeError("BLOB_CONTAINER_NAME is not configured.")
 
-def get_blob_service_client() -> BlobServiceClient:
+# def get_blob_service_client() -> BlobServiceClient:
+#     connection_string = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
+
+#     if not connection_string:
+#         raise RuntimeError("AZURE_STORAGE_CONNECTION_STRING is not configured.")
+
+#     return BlobServiceClient.from_connection_string(connection_string)
+
+def get_blob_service_client():
     connection_string = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
 
+    print("=" * 80)
+    print("AZURE_STORAGE_CONNECTION_STRING:")
+    print(repr(connection_string))
+    print("=" * 80)
+
     if not connection_string:
-        raise RuntimeError("AZURE_STORAGE_CONNECTION_STRING is not configured.")
+        raise RuntimeError("AZURE_STORAGE_CONNECTION_STRING not configured")
 
     return BlobServiceClient.from_connection_string(connection_string)
 
