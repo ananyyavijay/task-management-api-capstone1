@@ -1,8 +1,79 @@
+# name: CD
+# # fixed publish profile value
+# on:
+#   push:
+#     branches: [main]
+#   workflow_dispatch:
+
+# permissions:
+#   contents: read
+#   packages: write
+
+# env:
+#   GHCR_IMAGE: ghcr.io/${{ github.repository_owner }}/capstone-task-api
+
+# jobs:
+#   build-and-push:
+#     name: Build and push image to GHCR
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - uses: actions/checkout@v4
+
+#       - name: Set up Docker Buildx
+#         uses: docker/setup-buildx-action@v3
+
+#       - name: Log in to GitHub Container Registry
+#         uses: docker/login-action@v3
+#         with:
+#           registry: ghcr.io
+#           username: ${{ github.actor }}
+#           password: ${{ secrets.GITHUB_TOKEN }}
+
+#       - name: Extract Docker metadata
+#         id: meta
+#         uses: docker/metadata-action@v5
+#         with:
+#           images: ${{ env.GHCR_IMAGE }}
+#           tags: |
+#             type=sha,prefix=
+#             type=raw,value=latest,enable={{is_default_branch}}
+
+#       - name: Build and push
+#         uses: docker/build-push-action@v5
+#         with:
+#           context: .
+#           push: true
+#           tags: ${{ steps.meta.outputs.tags }}
+#           labels: ${{ steps.meta.outputs.labels }}
+
+#   deploy:
+#     name: Deploy to Azure App Service
+#     runs-on: ubuntu-latest
+#     needs: build-and-push
+#     # environment: production
+
+#     steps:
+#       - name: Deploy using Publish Profile
+#         uses: azure/webapps-deploy@v2
+#         with:
+#           app-name: capstone-task-api
+#           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+
+#       - name: Wait for application to start
+#         run: sleep 60
+
+#       - name: Verify deployment
+#         run: |
+#           curl -f https://capstone-task-api.azurewebsites.net/health
+
 name: CD
-# fixed publish profile value
+
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - "feature/**"
   workflow_dispatch:
 
 permissions:
@@ -14,21 +85,22 @@ env:
 
 jobs:
   build-and-push:
-    name: Build and push image to GHCR
+    name: Build and Push Docker Image
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to GitHub Container Registry
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Extract Docker metadata
         id: meta
@@ -39,7 +111,7 @@ jobs:
             type=sha,prefix=
             type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Build and push
+      - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -48,21 +120,32 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   deploy:
-    name: Deploy to Azure App Service
+    name: Deploy Container to Azure App Service
     runs-on: ubuntu-latest
     needs: build-and-push
     # environment: production
 
     steps:
-      - name: Deploy using Publish Profile
-        uses: azure/webapps-deploy@v2
+      - name: Deploy container
+        uses: azure/webapps-deploy@v3
         with:
           app-name: capstone-task-api
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          images: ${{ env.GHCR_IMAGE }}:latest
 
-      - name: Wait for application to start
+      - name: Wait for container
         run: sleep 60
 
       - name: Verify deployment
         run: |
           curl -f https://capstone-task-api.azurewebsites.net/health
+          echo "Container deployment verified!"
+
+      - name: Report deployment failure
+        if: failure()
+        run: |
+          echo "::error::Deployment to Azure failed!"
+          echo "Commit: ${{ github.sha }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Triggered by: ${{ github.actor }}"
+          echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
