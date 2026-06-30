@@ -2,6 +2,9 @@ import os
 from uuid import uuid4
 
 from azure.storage.blob import BlobServiceClient
+from dotenv import load_dotenv
+
+load_dotenv()
 
 CONTAINER_NAME = os.getenv("BLOB_CONTAINER_NAME")
 
@@ -9,17 +12,10 @@ if not CONTAINER_NAME:
     raise RuntimeError("BLOB_CONTAINER_NAME is not configured.")
 
 def get_blob_service_client() -> BlobServiceClient:
-    """
-    Returns a BlobServiceClient using the connection string.
-    Works with both Azurite and Azure Blob Storage.
-    """
-
     connection_string = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
 
     if not connection_string:
-        raise RuntimeError(
-            "AZURE_STORAGE_CONNECTION_STRING is not configured."
-        )
+        raise RuntimeError("AZURE_STORAGE_CONNECTION_STRING is not configured.")
 
     return BlobServiceClient.from_connection_string(connection_string)
 
@@ -42,15 +38,6 @@ def create_container_if_not_exists():
 
 
 def upload_file(task_id: str, filename: str, content: bytes) -> dict:
-    """
-    Uploads a file to Azure Blob Storage/Azurite.
-
-    Blob name format:
-        {task_id}/{uuid4}_{filename}
-
-    Returns:
-        Blob URL
-    """
 
     blob_service = get_blob_service_client()
 
