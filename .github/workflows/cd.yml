@@ -1,5 +1,5 @@
 name: CD
-
+# fixed publish profile value
 on:
   push:
     branches: [main]
