@@ -1,5 +1,5 @@
 name: CD
-
+#fixed write permission
 on:
   push:
     branches: [main]
