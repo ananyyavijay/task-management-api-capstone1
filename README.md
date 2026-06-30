@@ -377,21 +377,6 @@ pytest tests/ -v
 
 ---
 
-# Screenshots
-
-Add screenshots of:
-
-- Swagger UI
-- Azure Portal Resources
-- Azure Blob Storage
-- Azure SQL Database
-- Azure Service Bus Queue
-- Azure Function Monitor
-- GitHub Actions CI
-- GitHub Actions CD
-
----
-
 # Future Improvements
 
 - Email notifications
