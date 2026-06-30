@@ -32,3 +32,7 @@ jobs:
           APP_ENV: test
           DATABASE_URL: "sqlite://"
           JWT_SECRET: test-secret-key
+          BLOB_CONTAINER_NAME: ${{ secrets.BLOB_CONTAINER_NAME }}
+          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+          SERVICE_BUS_CONNECTION: ${{ secrets.SERVICE_BUS_CONNECTION }}
+          SERVICE_BUS_QUEUE_NAME: ${{ secrets.SERVICE_BUS_QUEUE_NAME }}
